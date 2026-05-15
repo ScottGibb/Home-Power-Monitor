@@ -7,11 +7,11 @@ COPY . .
 RUN cargo build --release
 
 # Stage 2: Production runtime
-FROM debian:bookworm-slim AS prod
+FROM alpine:latest AS prod
 COPY --from=builder /app/target/release/home_power_monitor /usr/local/bin/home_power_monitor
 CMD ["home_power_monitor"]
 
 # Stage 3: Development runtime
-FROM debian:bookworm-slim AS dev
+FROM alpine:latest AS dev
 COPY --from=builder /app/target/release/home_power_monitor /usr/local/bin/home_power_monitor
 CMD ["home_power_monitor"]
