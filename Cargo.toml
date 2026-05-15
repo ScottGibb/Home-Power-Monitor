@@ -6,14 +6,24 @@ edition = "2024"
 [features]
 default = []
 
-database = []
-mqqt = []
-screen = []
+database = ["dep:tokio-postgres"]
+mqtt = ["dep:mqtt-endpoint-tokio"]
+screen = ["dep:liquid_crystal"]
 
 [dependencies]
-commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2.0" }
-# jsy-mk-194-rs = { version = "0.1.2", default-features = false, features = "tokio-async" }
-tokio = "1.52.3"
+tokio-postgres = { version = "0.7", optional = true }
+mqtt-endpoint-tokio = { version = "0.6", optional = true }
+liquid_crystal = { version = "0.2", features = ["async"], optional = true }
+
+
+jsy-mk-194-rs = { version = "0.1", default-features = false, features = [
+    "tokio-async",
+] }
+tokio = "1"
+tokio-serial = "5"
+commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2" }
+post-haste = { git = "https://github.com/petekubiak/post-haste.git", version = "0.7" }
+
 
 [build-dependencies]
-commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2.0" }
+commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2" }
