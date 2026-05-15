@@ -1,0 +1,17 @@
+---
+name: Continuous Build
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_call:
+
+jobs:
+  Build:
+    name: Different Build Confgurations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Build
+        run: cargo build --workspace --all-targets
