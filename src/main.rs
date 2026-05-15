@@ -1,12 +1,11 @@
-commitment_issues::include_metadata!();
-fn main() {
-    println!("Hello, world!");
+use home_power_monitor::{print_metadata, setup_agents, setup_terminal_buttons};
 
-    println!("\n Here is the binary's metadata:\n");
-    println!("Schema version:  {}", metadata::schema());
-    println!("Compile time:    {}", metadata::compile_time());
-    println!("Commit hash:     {}", metadata::short_hash());
-    println!("Is dirty build:  {}", metadata::is_dirty());
-    println!("Tag description: {}", metadata::tag_describe());
-    println!("Last author:     {}", metadata::last_author());
+#[tokio::main]
+async fn main() {
+    setup_agents().await;
+    #[cfg(feature = "terminal-buttons")]
+    setup_terminal_buttons().await;
+    print_metadata();
+
+    tokio::signal::ctrl_c().await.unwrap();
 }

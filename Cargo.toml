@@ -4,8 +4,11 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = []
+default = ["terminal-buttons"]
+# default = []
 
+terminal-buttons = []
+gpio-buttons = []
 database = ["dep:tokio-postgres"]
 mqtt = ["dep:mqtt-endpoint-tokio"]
 screen = ["dep:liquid_crystal"]
