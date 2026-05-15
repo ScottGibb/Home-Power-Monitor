@@ -3,4 +3,17 @@ name = "home_power_monitor"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+default = []
+
+database = []
+mqqt = []
+screen = []
+
 [dependencies]
+commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2.0" }
+# jsy-mk-194-rs = { version = "0.1.2", default-features = false, features = "tokio-async" }
+tokio = "1.52.3"
+
+[build-dependencies]
+commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2.0" }
