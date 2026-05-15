@@ -7,7 +7,7 @@ on:
   workflow_call:
 
 jobs:
-  Build:
+  Rust:
     name: Different Build Confgurations
     runs-on: ubuntu-latest
     steps:
@@ -15,3 +15,19 @@ jobs:
         uses: actions/checkout@v6
       - name: Build
         run: cargo build --workspace --all-targets
+
+  Docker:
+    name: Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Dev Target
+        run: docker build . -t home-power-monitor:dev --target dev
+
+      - name: Build Prod Target
+        run: docker build . -t home-power-monitor:prod --target prod
