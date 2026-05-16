@@ -14,7 +14,7 @@ pub enum Payloads {
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Addresses {
     Core,
-    PoliteAgent,
+    DebugAgent,
     Button,
     PowerMeter,
     CSV,

@@ -28,7 +28,7 @@ pub fn print_metadata() {
 }
 
 pub async fn setup_agents() {
-    postmaster::register_agent!(PoliteAgent, DebugAgent, ()).unwrap();
+    postmaster::register_agent!(DebugAgent, DebugAgent, ()).unwrap();
     postmaster::register_agent!(PowerMeter, PowerMeterAgent, get_power_meter_config()).unwrap();
     #[cfg(feature = "csv")]
     postmaster::register_agent!(CSV, CSVExporterAgent, get_csv_exporter_config()).unwrap();

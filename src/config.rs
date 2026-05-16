@@ -34,7 +34,7 @@ impl Default for TerminalButtonConfigs {
         TerminalButtonConfigs::new(vec![TerminalButtonConfig {
             key: "start",
             button: Button::Start,
-            receivers: vec![Addresses::PoliteAgent],
+            receivers: vec![Addresses::DebugAgent],
         }])
     }
 }
