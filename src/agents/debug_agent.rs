@@ -4,11 +4,11 @@ use tokio::time::sleep;
 
 use crate::{Addresses, Payloads, postmaster};
 
-pub(crate) struct PoliteAgent {
+pub(crate) struct DebugAgent {
     address: Addresses,
 }
 
-impl Agent for PoliteAgent {
+impl Agent for DebugAgent {
     type Address = Addresses;
     type Message = postmaster::Message;
     type Config = ();
@@ -21,22 +21,11 @@ impl Agent for PoliteAgent {
         loop {
             let received_message = inbox.recv().await.unwrap();
             match &received_message.payload {
-                Payloads::Hello => self.handle_hello(received_message.source).await,
                 _ => println!(
-                    "PoliteAgent received the following message: {:?}",
+                    "DebugAgent received the following message: {:?}",
                     received_message.payload
                 ),
             };
         }
-    }
-}
-
-impl PoliteAgent {
-    async fn handle_hello(&self, source: Addresses) {
-        println!("{:?} got hello from {:?}!", self.address, source);
-        sleep(Duration::from_secs(1)).await;
-        postmaster::send(source, self.address, Payloads::Hello)
-            .await
-            .unwrap();
     }
 }

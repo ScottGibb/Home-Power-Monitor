@@ -1,17 +1,18 @@
 pub mod buttons;
-pub mod polite_agent;
+pub mod debug_agent;
 pub mod power_meter_agent;
+use jsy_mk_194_rs::types::ChannelStatistics;
 pub use power_meter_agent::PowerMeterAgent;
 
 use crate::agents::buttons::Button;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Payloads {
-    Hello,
     ButtonPressed(Button),
+    PowerReading(ChannelStatistics),
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Addresses {
     Core,
     PoliteAgent,

@@ -5,11 +5,10 @@ pub mod agents;
 pub mod config;
 use crate::{
     agents::{
-        Addresses, Payloads, PowerMeterAgent,
-        buttons::{configs::TerminalButtonConfigs, terminal_button_agent::TerminalButtonAgent},
-        polite_agent::PoliteAgent,
+        Addresses, Payloads, PowerMeterAgent, buttons::terminal_button_agent::TerminalButtonAgent,
+        debug_agent::DebugAgent,
     },
-    config::read_terminal_button_configs,
+    config::{get_power_meter_config, get_terminal_button_configs},
 };
 use post_haste::init_postmaster;
 init_postmaster!(Addresses, Payloads);
@@ -25,12 +24,12 @@ pub fn print_metadata() {
 }
 
 pub async fn setup_agents() {
-    postmaster::register_agent!(PoliteAgent, PoliteAgent, ()).unwrap();
-    postmaster::register_agent!(PowerMeter, PowerMeterAgent, ()).unwrap();
+    postmaster::register_agent!(PoliteAgent, DebugAgent, ()).unwrap();
+    postmaster::register_agent!(PowerMeter, PowerMeterAgent, get_power_meter_config()).unwrap();
 }
 
 pub async fn setup_terminal_buttons() {
-    let buttons = read_terminal_button_configs();
+    let buttons = get_terminal_button_configs();
     for button in buttons {
         let agent = TerminalButtonAgent {
             key: button.key,

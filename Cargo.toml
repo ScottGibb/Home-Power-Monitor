@@ -30,3 +30,6 @@ post-haste = { git = "https://github.com/petekubiak/post-haste.git", version = "
 
 [build-dependencies]
 commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2" }
+
+[patch.crates-io]
+jsy-mk-194-rs = { git = "https://github.com/ScottGibb/JSY-MK-194-rs.git", rev = "de44d5198cde32822b91aefc6f00cb6dfd589f51" }
