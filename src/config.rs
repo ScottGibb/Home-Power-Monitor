@@ -5,9 +5,9 @@ use crate::agents::{
     exports::csv_exporter_agent,
     inputs::{
         Button,
-        configs::{TerminalButtonConfig, TerminalButtonConfigs},
+        buttons::configs::{TerminalButtonConfig, TerminalButtonConfigs},
+        power_meter_agent,
     },
-    power_meter_agent,
 };
 use jsy_mk_194_rs::types::Baudrate;
 

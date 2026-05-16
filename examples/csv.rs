@@ -2,6 +2,7 @@ use home_power_monitor::{
     agents::{
         Addresses, Payloads,
         exports::csv_exporter_agent::{self, CSVExporterAgent},
+        inputs::power_meter_agent::PowerReading,
     },
     postmaster,
 };
@@ -10,7 +11,6 @@ use jsy_mk_194_rs::{
     units::{ampere, volt, watt},
 };
 
-use home_power_monitor::agents::power_meter_agent::PowerReading;
 use jsy_mk_194_rs::{
     types::ChannelStatistics,
     units::{ElectricCurrent, ElectricPotential, Energy, Power, watt_hour},

@@ -3,7 +3,7 @@ use std::path::PathBuf;
 use post_haste::agent::{Agent, Inbox};
 
 use crate::{
-    agents::{Addresses, Payloads, power_meter_agent::PowerReading},
+    agents::{Addresses, Payloads, inputs::power_meter_agent::PowerReading},
     postmaster,
 };
 use csv_async::AsyncWriter;

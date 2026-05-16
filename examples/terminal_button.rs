@@ -1,5 +1,5 @@
 use home_power_monitor::agents::debug_agent::DebugAgent;
-use home_power_monitor::agents::inputs::terminal_command_agent::TerminalCommandAgent;
+use home_power_monitor::agents::inputs::buttons::terminal_command_agent::TerminalCommandAgent;
 use home_power_monitor::agents::{Addresses, inputs::Button};
 use home_power_monitor::postmaster;
 

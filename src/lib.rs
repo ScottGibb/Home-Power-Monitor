@@ -1,4 +1,5 @@
 #![feature(variant_count)]
+#![allow(unused_imports)]
 
 commitment_issues::include_metadata!();
 pub mod agents;
@@ -6,14 +7,18 @@ pub mod config;
 
 use crate::{
     agents::{
-        Addresses, debug_agent::DebugAgent, exports::csv_exporter_agent::CSVExporterAgent,
-        inputs::terminal_command_agent::TerminalCommandAgent, power_meter_agent::PowerMeterAgent,
+        Addresses,
+        debug_agent::DebugAgent,
+        exports::csv_exporter_agent::CSVExporterAgent,
+        inputs::{
+            buttons::terminal_command_agent::TerminalCommandAgent,
+            power_meter_agent::PowerMeterAgent,
+        },
     },
     config::{get_csv_exporter_config, get_power_meter_config, get_terminal_button_configs},
 };
 use post_haste::init_postmaster;
 
-#[allow(unused_imports)]
 use crate::agents::Payloads;
 init_postmaster!(Addresses, Payloads);
 
