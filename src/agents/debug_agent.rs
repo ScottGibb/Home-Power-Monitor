@@ -2,7 +2,7 @@ use post_haste::agent::{Agent, Inbox};
 
 use crate::{Addresses, postmaster};
 
-pub(crate) struct DebugAgent {
+pub struct DebugAgent {
     _address: Addresses,
 }
 
