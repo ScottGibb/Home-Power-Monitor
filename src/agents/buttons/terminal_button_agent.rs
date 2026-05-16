@@ -9,7 +9,7 @@ use crate::{
 };
 
 pub struct TerminalButtonAgent {
-    pub key: char,
+    pub key: &'static str,
     pub button: Button,
     pub receivers: Vec<Addresses>,
 }
@@ -21,8 +21,8 @@ impl TerminalButtonAgent {
 
         loop {
             if let Ok(Some(line)) = reader.next_line().await {
-                if line == self.key.to_string() {
-                    println!("ButtonAgent detected a button press!");
+                if line == self.key {
+                    println!("ButtonAgent detected a button press on key '{}'", self.key);
                     for receiver in &self.receivers {
                         match postmaster::send(
                             *receiver,

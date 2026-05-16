@@ -1,7 +1,7 @@
 use crate::agents::{Addresses, Button};
 
 pub struct TerminalButtonConfig {
-    pub key: char,
+    pub key: &'static str,
     pub button: Button,
     pub receivers: Vec<Addresses>,
 }
@@ -11,7 +11,7 @@ pub struct TerminalButtonConfigs(Vec<TerminalButtonConfig>);
 impl Default for TerminalButtonConfigs {
     fn default() -> Self {
         TerminalButtonConfigs(vec![TerminalButtonConfig {
-            key: 'b',
+            key: "start",
             button: Button::Start,
             receivers: vec![Addresses::PoliteAgent],
         }])
