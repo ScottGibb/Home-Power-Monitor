@@ -1,6 +1,6 @@
 use crate::agents::{
     Addresses,
-    buttons::{
+    inputs::{
         Button,
         configs::{TerminalButtonConfig, TerminalButtonConfigs},
     },

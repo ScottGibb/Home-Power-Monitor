@@ -5,8 +5,8 @@ pub mod agents;
 pub mod config;
 use crate::{
     agents::{
-        Addresses, Payloads, PowerMeterAgent, buttons::terminal_button_agent::TerminalButtonAgent,
-        debug_agent::DebugAgent,
+        Addresses, Payloads, PowerMeterAgent, debug_agent::DebugAgent,
+        inputs::terminal_command_agent::TerminalCommandAgent,
     },
     config::{get_power_meter_config, get_terminal_button_configs},
 };
@@ -31,7 +31,7 @@ pub async fn setup_agents() {
 pub async fn setup_terminal_buttons() {
     let buttons = get_terminal_button_configs();
     for button in buttons {
-        let agent = TerminalButtonAgent {
+        let agent = TerminalCommandAgent {
             key: button.key,
             button: button.button,
             receivers: button.receivers,

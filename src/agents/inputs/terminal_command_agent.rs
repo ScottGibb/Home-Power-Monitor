@@ -4,17 +4,17 @@
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 
 use crate::{
-    agents::{Addresses, Payloads, buttons::Button},
+    agents::{Addresses, Payloads, inputs::Button},
     postmaster,
 };
 
-pub struct TerminalButtonAgent {
+pub struct TerminalCommandAgent {
     pub key: &'static str,
     pub button: Button,
     pub receivers: Vec<Addresses>,
 }
 
-impl TerminalButtonAgent {
+impl TerminalCommandAgent {
     pub async fn button_task(self) -> ! {
         let stdin = io::stdin();
         let mut reader = BufReader::new(stdin).lines();

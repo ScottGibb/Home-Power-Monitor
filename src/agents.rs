@@ -1,10 +1,10 @@
-pub mod buttons;
 pub mod debug_agent;
+pub mod inputs;
 pub mod power_meter_agent;
 use jsy_mk_194_rs::types::ChannelStatistics;
 pub use power_meter_agent::PowerMeterAgent;
 
-use crate::agents::buttons::Button;
+use crate::agents::inputs::Button;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Payloads {
