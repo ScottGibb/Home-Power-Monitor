@@ -39,3 +39,7 @@ pub async fn setup_terminal_buttons() {
         tokio::spawn(agent.button_task());
     }
 }
+
+pub async fn setup_gpio_buttons() {
+    unimplemented!("GPIO button support is not yet implemented");
+}
