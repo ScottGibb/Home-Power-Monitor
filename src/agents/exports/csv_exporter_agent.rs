@@ -68,7 +68,7 @@ impl Agent for CSVExporterAgent {
                     // Append the reading to the CSV file
                     match self.append_to_csv(reading).await {
                         Ok(_) => {
-                            (println!("CSVExporterAgent successfully wrote a new record to CSV"))
+                            println!("CSVExporterAgent successfully wrote a new record to CSV")
                         }
                         Err(e) => eprintln!("Failed to write to CSV: {:?}", e),
                     }
