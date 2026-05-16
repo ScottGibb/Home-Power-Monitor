@@ -20,20 +20,20 @@ impl TerminalButtonAgent {
         let mut reader = BufReader::new(stdin).lines();
 
         loop {
-            if let Ok(Some(line)) = reader.next_line().await {
-                if line == self.key {
-                    println!("ButtonAgent detected a button press on key '{}'", self.key);
-                    for receiver in &self.receivers {
-                        match postmaster::send(
-                            *receiver,
-                            Addresses::Button,
-                            Payloads::ButtonPressed(self.button),
-                        )
-                        .await
-                        {
-                            Ok(_) => (),
-                            Err(e) => eprintln!("Failed to send message: {:?}", e),
-                        }
+            if let Ok(Some(line)) = reader.next_line().await
+                && line == self.key
+            {
+                println!("ButtonAgent detected a button press on key '{}'", self.key);
+                for receiver in &self.receivers {
+                    match postmaster::send(
+                        *receiver,
+                        Addresses::Button,
+                        Payloads::ButtonPressed(self.button),
+                    )
+                    .await
+                    {
+                        Ok(_) => (),
+                        Err(e) => eprintln!("Failed to send message: {:?}", e),
                     }
                 }
             }
