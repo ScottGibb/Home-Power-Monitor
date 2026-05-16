@@ -3,14 +3,18 @@
 commitment_issues::include_metadata!();
 pub mod agents;
 pub mod config;
+
 use crate::{
     agents::{
-        Addresses, Payloads, PowerMeterAgent, debug_agent::DebugAgent,
-        inputs::terminal_command_agent::TerminalCommandAgent,
+        Addresses, debug_agent::DebugAgent, exports::csv_exporter_agent::CSVExporterAgent,
+        inputs::terminal_command_agent::TerminalCommandAgent, power_meter_agent::PowerMeterAgent,
     },
-    config::{get_power_meter_config, get_terminal_button_configs},
+    config::{get_csv_exporter_config, get_power_meter_config, get_terminal_button_configs},
 };
 use post_haste::init_postmaster;
+
+#[allow(unused_imports)]
+use crate::agents::Payloads;
 init_postmaster!(Addresses, Payloads);
 
 pub fn print_metadata() {
@@ -26,6 +30,8 @@ pub fn print_metadata() {
 pub async fn setup_agents() {
     postmaster::register_agent!(PoliteAgent, DebugAgent, ()).unwrap();
     postmaster::register_agent!(PowerMeter, PowerMeterAgent, get_power_meter_config()).unwrap();
+    #[cfg(feature = "csv")]
+    postmaster::register_agent!(CSV, CSVExporterAgent, get_csv_exporter_config()).unwrap();
 }
 
 pub async fn setup_terminal_buttons() {

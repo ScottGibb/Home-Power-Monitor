@@ -6,11 +6,13 @@ use crate::{
     agents::{Addresses, Payloads},
     postmaster,
 };
-use jsy_mk_194_rs::delay::StdDelay;
+use chrono::{DateTime, Utc};
 use jsy_mk_194_rs::jsy_mk_194g::JsyMk194g;
 use jsy_mk_194_rs::types::Baudrate;
 use jsy_mk_194_rs::types::Channel;
+use jsy_mk_194_rs::{delay::StdDelay, types::ChannelStatistics};
 use tokio_serial::{SerialPortBuilderExt, SerialStream};
+
 pub struct PowerMeterAgent {
     address: Addresses,
     power_meter: JsyMk194g<SerialStream, StdDelay>,
@@ -23,6 +25,11 @@ pub struct Config {
     pub baud_rate: Baudrate,
     pub period: Duration,
     pub receivers: Vec<Addresses>,
+}
+#[derive(Debug, Clone, PartialEq)]
+pub struct PowerReading {
+    pub timestamp: DateTime<Utc>,
+    pub reading: ChannelStatistics,
 }
 impl Agent for PowerMeterAgent {
     type Address = Addresses;
@@ -50,7 +57,10 @@ impl Agent for PowerMeterAgent {
                 _ = ticker.tick() => {
                     match self.power_meter.get_channel(Channel::One).await {
                         Ok(reading) => {
-                            let message = Payloads::PowerReading(reading);
+                            let message = Payloads::PowerReading(PowerReading {
+                                timestamp: Utc::now(),
+                                reading,
+                            });
                             for receiver in &self.receivers {
                                 if let Err(err) = postmaster::send(self.address, *receiver, message.clone()).await {
                                     eprintln!("PowerMeterAgent failed to send reading: {:?}", err);

@@ -1,22 +1,24 @@
 pub mod debug_agent;
+pub mod exports;
 pub mod inputs;
 pub mod power_meter_agent;
-use jsy_mk_194_rs::types::ChannelStatistics;
-pub use power_meter_agent::PowerMeterAgent;
 
-use crate::agents::inputs::Button;
+use crate::agents::{inputs::Button, power_meter_agent::PowerReading};
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Payloads {
     ButtonPressed(Button),
-    PowerReading(ChannelStatistics),
+    PowerReading(PowerReading),
 }
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Addresses {
     Core,
     PoliteAgent,
-    PowerMeter,
-    Screen,
     Button,
+    PowerMeter,
+    CSV,
+    Database,
+    MQTT,
+    Screen,
 }

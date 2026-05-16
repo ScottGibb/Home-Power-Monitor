@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["terminal-buttons"]
+default = ["terminal-buttons", "csv"]
 # default = []
 
 terminal-buttons = []
 gpio-buttons = []
 database = ["dep:tokio-postgres"]
+csv = ["dep:csv-async"]
 mqtt = ["dep:mqtt-endpoint-tokio"]
 screen = ["dep:liquid_crystal"]
 
@@ -17,6 +18,7 @@ screen = ["dep:liquid_crystal"]
 tokio-postgres = { version = "0.7", optional = true }
 mqtt-endpoint-tokio = { version = "0.6", optional = true }
 liquid_crystal = { version = "0.2", features = ["async"], optional = true }
+csv-async = { version = "1.3.1", optional = true, features = ["tokio"] }
 
 
 jsy-mk-194-rs = { version = "0.1", default-features = false, features = [
@@ -26,10 +28,14 @@ tokio = "1"
 tokio-serial = "5"
 commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2" }
 post-haste = { git = "https://github.com/petekubiak/post-haste.git", version = "0.7" }
+chrono = "0.4.44"
 
 
 [build-dependencies]
 commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2" }
 
 [patch.crates-io]
-jsy-mk-194-rs = { git = "https://github.com/ScottGibb/JSY-MK-194-rs.git", rev = "de44d5198cde32822b91aefc6f00cb6dfd589f51" }
+jsy-mk-194-rs = { git = "https://github.com/ScottGibb/JSY-MK-194-rs.git", rev = "a7e03e8" }
+
+[dev-dependencies]
+rand = "0.10.1"
