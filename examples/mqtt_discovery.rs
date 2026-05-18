@@ -24,17 +24,18 @@ async fn main() {
     home_power_monitor::init_tracing();
 
     let config = mqtt_exporter_agent::Config {
-        server_address: "127.0.0.1".to_string(),
+        server_address: "192.168.0.68".to_string(),
         port: 1883,
     };
 
+    info!("Registering MQTT exporter agent with Home Assistant discovery");
     // Registering the MQTT exporter publishes Home Assistant discovery config.
     postmaster::register_agent!(MQTT, MQTTExporterAgent, config).unwrap();
 
     let mut watts: f32 = 0.0;
     loop {
         tokio::time::sleep(std::time::Duration::from_secs(5)).await;
-
+        info!(watts = watts, "Generating mock power reading");
         let record = PowerReading {
             timestamp: chrono::Utc::now(),
             reading: ChannelStatistics {

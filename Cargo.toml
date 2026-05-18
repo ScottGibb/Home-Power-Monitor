@@ -11,14 +11,14 @@ terminal-buttons = []
 gpio-buttons = []
 database = ["dep:tokio-postgres"]
 csv = ["dep:csv-async"]
-mqtt = ["dep:mqtt-endpoint-tokio"]
+mqtt = ["dep:rumqttc"]
 screen = ["dep:liquid_crystal"]
 
 mock-power-meter = []
 
 [dependencies]
 tokio-postgres = { version = "0.7", optional = true }
-mqtt-endpoint-tokio = { version = "0.6", optional = true }
+rumqttc = { version = "0.25", optional = true }
 liquid_crystal = { version = "0.2", features = ["async"], optional = true }
 csv-async = { version = "1", optional = true, features = ["tokio"] }
 
