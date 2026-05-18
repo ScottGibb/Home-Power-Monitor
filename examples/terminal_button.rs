@@ -1,8 +1,3 @@
-use home_power_monitor::agents::debug_agent::DebugAgent;
-use home_power_monitor::agents::inputs::buttons::terminal_command_agent::TerminalCommandAgent;
-use home_power_monitor::agents::{Addresses, inputs::Button};
-use home_power_monitor::postmaster;
-
 #[cfg(not(feature = "terminal-buttons"))]
 fn main() {
     panic!(
@@ -13,6 +8,10 @@ fn main() {
 #[cfg(feature = "terminal-buttons")]
 #[tokio::main]
 async fn main() {
+    use home_power_monitor::agents::debug_agent::DebugAgent;
+    use home_power_monitor::agents::inputs::buttons::terminal_command_agent::TerminalCommandAgent;
+    use home_power_monitor::agents::{Addresses, inputs::Button};
+    use home_power_monitor::postmaster;
     home_power_monitor::init_tracing();
 
     let agent = TerminalCommandAgent {

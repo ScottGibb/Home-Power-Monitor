@@ -1,24 +1,33 @@
-#![feature(variant_count)]
 #![allow(unused_imports)]
+#![feature(variant_count)]
 
 commitment_issues::include_metadata!();
 pub mod agents;
 pub mod config;
 
+#[cfg(feature = "mqtt")]
+use crate::agents::exports::mqtt_exporter_agent::MQTTExporterAgent;
+
 #[cfg(feature = "mock-power-meter")]
-use crate::agents::inputs::mock_power_meter_agent::{Config, MockPowerMeterAgent};
+use crate::agents::inputs::mock_power_meter_agent::MockPowerMeterAgent;
+
+#[cfg(feature = "mqtt")]
+use crate::config::get_mqtt_exporter_config;
+
+#[cfg(feature = "csv")]
 use crate::{
-    agents::{
-        Addresses,
-        debug_agent::DebugAgent,
-        exports::csv_exporter_agent::CSVExporterAgent,
-        inputs::{
-            buttons::terminal_command_agent::TerminalCommandAgent,
-            power_meter_agent::PowerMeterAgent,
-        },
-    },
-    config::{get_csv_exporter_config, get_power_meter_config, get_terminal_button_configs},
+    agents::exports::csv_exporter_agent::CSVExporterAgent, config::get_csv_exporter_config,
 };
+
+use crate::agents::inputs::mock_power_meter_agent::{Config, MockPowerMeterAgent};
+use crate::agents::{
+    Addresses,
+    debug_agent::DebugAgent,
+    inputs::{
+        buttons::terminal_command_agent::TerminalCommandAgent, power_meter_agent::PowerMeterAgent,
+    },
+};
+use crate::config::{get_power_meter_config, get_terminal_button_configs};
 use post_haste::init_postmaster;
 use tracing::info;
 use tracing_subscriber::EnvFilter;
@@ -57,6 +66,8 @@ pub async fn setup_agents() {
     .unwrap();
     #[cfg(feature = "csv")]
     postmaster::register_agent!(CSV, CSVExporterAgent, get_csv_exporter_config()).unwrap();
+    #[cfg(feature = "mqtt")]
+    postmaster::register_agent!(MQTT, MQTTExporterAgent, get_mqtt_exporter_config()).unwrap();
 }
 
 pub async fn setup_terminal_buttons() {
