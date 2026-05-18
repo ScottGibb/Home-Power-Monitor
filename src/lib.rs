@@ -5,6 +5,8 @@ commitment_issues::include_metadata!();
 pub mod agents;
 pub mod config;
 
+#[cfg(feature = "mock-power-meter")]
+use crate::agents::inputs::mock_power_meter_agent::{Config, MockPowerMeterAgent};
 use crate::{
     agents::{
         Addresses,
@@ -34,7 +36,18 @@ pub fn print_metadata() {
 
 pub async fn setup_agents() {
     postmaster::register_agent!(DebugAgent, DebugAgent, ()).unwrap();
+    #[cfg(not(feature = "mock-power-meter"))]
     postmaster::register_agent!(PowerMeter, PowerMeterAgent, get_power_meter_config()).unwrap();
+    #[cfg(feature = "mock-power-meter")]
+    postmaster::register_agent!(
+        PowerMeter,
+        MockPowerMeterAgent,
+        Config {
+            period: get_power_meter_config().period,
+            receivers: get_power_meter_config().receivers,
+        }
+    )
+    .unwrap();
     #[cfg(feature = "csv")]
     postmaster::register_agent!(CSV, CSVExporterAgent, get_csv_exporter_config()).unwrap();
 }

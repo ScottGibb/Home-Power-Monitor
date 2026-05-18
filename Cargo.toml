@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["terminal-buttons", "csv"]
+default = ["terminal-buttons", "csv", "mock-power-meter"]
 # default = []
 
 terminal-buttons = []
@@ -13,6 +13,8 @@ database = ["dep:tokio-postgres"]
 csv = ["dep:csv-async"]
 mqtt = ["dep:mqtt-endpoint-tokio"]
 screen = ["dep:liquid_crystal"]
+
+mock-power-meter = []
 
 [dependencies]
 tokio-postgres = { version = "0.7", optional = true }
