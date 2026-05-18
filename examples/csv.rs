@@ -1,3 +1,5 @@
+use home_power_monitor::postmaster;
+
 #[cfg(not(feature = "csv"))]
 fn main() {
     panic!(
@@ -8,24 +10,17 @@ fn main() {
 #[cfg(feature = "csv")]
 #[tokio::main]
 async fn main() {
-    use home_power_monitor::{
-        agents::{
-            Addresses, Payloads,
-            exports::csv_exporter_agent::{self, CSVExporterAgent},
-            inputs::power_meter_agent::PowerReading,
-        },
-        postmaster,
+    use home_power_monitor::agents::{
+        Addresses, Payloads,
+        exports::csv_exporter_agent::{self, CSVExporterAgent},
+        inputs::power_meter_agent::PowerReading,
     };
     use jsy_mk_194_rs::{
-        types::PowerDirection,
-        units::{ampere, volt, watt},
-    };
-
-    use jsy_mk_194_rs::{
-        types::ChannelStatistics,
-        units::{ElectricCurrent, ElectricPotential, Energy, Power, watt_hour},
+        types::{ChannelStatistics, PowerDirection},
+        units::{ElectricCurrent, ElectricPotential, Energy, Power, ampere, volt, watt, watt_hour},
     };
     use tracing::info;
+
     home_power_monitor::init_tracing();
 
     let config = csv_exporter_agent::Config {

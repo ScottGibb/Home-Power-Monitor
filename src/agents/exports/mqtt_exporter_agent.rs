@@ -1,6 +1,6 @@
 use crate::{
     agents::{
-        Addresses, Payloads, exports::mqtt_home_assistant::HomeAssistantSensorDiscovery,
+        Addresses, Payloads, exports::home_assistant_protocol::HomeAssistantSensorDiscovery,
         inputs::power_meter_agent::PowerReading,
     },
     postmaster::{self, Message},

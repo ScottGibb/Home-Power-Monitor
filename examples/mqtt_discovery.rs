@@ -1,3 +1,5 @@
+use home_power_monitor::postmaster;
+
 #[cfg(not(feature = "mqtt"))]
 fn main() {
     panic!(
@@ -8,12 +10,11 @@ fn main() {
 #[cfg(feature = "mqtt")]
 #[tokio::main]
 async fn main() {
+    use home_power_monitor::agents::{Addresses, Payloads};
     use home_power_monitor::agents::{
-        Addresses, Payloads,
-        exports::mqtt_exporter_agent::{self},
+        exports::mqtt_exporter_agent::{self, MQTTExporterAgent},
         inputs::power_meter_agent::PowerReading,
     };
-    use home_power_monitor::postmaster;
     use jsy_mk_194_rs::{
         types::{ChannelStatistics, PowerDirection},
         units::{ElectricCurrent, ElectricPotential, Energy, Power, ampere, volt, watt, watt_hour},
