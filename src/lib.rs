@@ -70,6 +70,10 @@ pub async fn setup_agents() {
     postmaster::register_agent!(CSV, CSVExporterAgent, get_csv_exporter_config()).unwrap();
     #[cfg(feature = "mqtt")]
     postmaster::register_agent!(MQTT, MQTTExporterAgent, get_mqtt_exporter_config()).unwrap();
+    #[cfg(feature = "database")]
+    unimplemented!("Database agent is not yet implemented");
+    #[cfg(feature = "screen")]
+    unimplemented!("Screen agent is not yet implemented");
 }
 
 pub async fn setup_terminal_buttons() {
