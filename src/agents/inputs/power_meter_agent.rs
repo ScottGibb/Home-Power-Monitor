@@ -62,7 +62,7 @@ impl Agent for PowerMeterAgent {
                                 reading,
                             });
                             for receiver in &self.receivers {
-                                if let Err(err) = postmaster::send(self.address, *receiver, message.clone()).await {
+                                if let Err(err) = postmaster::send( *receiver,self.address, message.clone()).await {
                                     eprintln!("PowerMeterAgent failed to send reading: {:?}", err);
                                 }
                             }

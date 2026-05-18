@@ -16,7 +16,7 @@ pub fn get_terminal_button_configs() -> TerminalButtonConfigs {
 }
 pub fn get_power_meter_config() -> power_meter_agent::Config {
     power_meter_agent::Config {
-        serial_port: "/dev/ttyUSB0".to_string(),
+        serial_port: "/dev/tty.usbserial-0001".to_string(),
         baud_rate: Baudrate::default(),
         period: std::time::Duration::from_secs(5),
         receivers: vec![Addresses::CSV],
