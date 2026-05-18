@@ -12,6 +12,7 @@ use jsy_mk_194_rs::types::Baudrate;
 use jsy_mk_194_rs::types::Channel;
 use jsy_mk_194_rs::{delay::StdDelay, types::ChannelStatistics};
 use tokio_serial::{SerialPortBuilderExt, SerialStream};
+use tracing::{error, info, warn};
 
 pub struct PowerMeterAgent {
     address: Addresses,
@@ -63,25 +64,22 @@ impl Agent for PowerMeterAgent {
                             });
                             for receiver in &self.receivers {
                                 if let Err(err) = postmaster::send( *receiver,self.address, message.clone()).await {
-                                    eprintln!("PowerMeterAgent failed to send reading: {:?}", err);
+                                    error!(error = ?err, "PowerMeterAgent failed to send reading");
                                 }
                             }
                         }
                         Err(err) => {
-                            eprintln!("PowerMeterAgent failed to read meter: {:?}", err);
+                            error!(error = ?err, "PowerMeterAgent failed to read meter");
                         }
                     }
                 }
                 received_message = inbox.recv() => {
                     match received_message {
                         Some(message) => {
-                            println!(
-                                "PowerMeterAgent received an unknown message: {:?}",
-                                message.payload
-                            );
+                            warn!(payload = ?message.payload, "PowerMeterAgent received an unknown message");
                         }
                         None => {
-                            eprintln!("PowerMeterAgent inbox closed");
+                            info!("PowerMeterAgent inbox closed");
                         }
                     }
                 }

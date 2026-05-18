@@ -2,6 +2,7 @@
 //! signalling that the pedestrian wants to cross
 
 use tokio::io::{self, AsyncBufReadExt, BufReader};
+use tracing::{error, info, trace};
 
 use crate::{
     agents::{Addresses, Payloads, inputs::Button},
@@ -23,7 +24,7 @@ impl TerminalCommandAgent {
             if let Ok(Some(line)) = reader.next_line().await
                 && line == self.key
             {
-                println!("ButtonAgent detected a button press on key '{}'", self.key);
+                trace!(key = %self.key, "ButtonAgent detected a button press");
                 for receiver in &self.receivers {
                     match postmaster::send(
                         *receiver,
@@ -33,7 +34,7 @@ impl TerminalCommandAgent {
                     .await
                     {
                         Ok(_) => (),
-                        Err(e) => eprintln!("Failed to send message: {:?}", e),
+                        Err(e) => error!(error = ?e, "ButtonAgent failed to send message"),
                     }
                 }
             }

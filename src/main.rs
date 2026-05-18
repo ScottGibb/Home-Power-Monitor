@@ -1,7 +1,8 @@
-use home_power_monitor::{print_metadata, setup_agents, setup_terminal_buttons};
+use home_power_monitor::{init_tracing, print_metadata, setup_agents, setup_terminal_buttons};
 
 #[tokio::main]
 async fn main() {
+    init_tracing();
     setup_agents().await;
     #[cfg(feature = "terminal-buttons")]
     setup_terminal_buttons().await;

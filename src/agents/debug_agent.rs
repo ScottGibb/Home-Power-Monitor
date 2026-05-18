@@ -1,4 +1,5 @@
 use post_haste::agent::{Agent, Inbox};
+use tracing::info;
 
 use crate::{Addresses, postmaster};
 
@@ -18,10 +19,7 @@ impl Agent for DebugAgent {
     async fn run(self, mut inbox: Inbox<Self::Message>) -> ! {
         loop {
             let received_message = inbox.recv().await.unwrap();
-            println!(
-                "DebugAgent received the following message: {:?}",
-                received_message.payload
-            );
+            info!(payload = ?received_message.payload, "DebugAgent received message");
         }
     }
 }

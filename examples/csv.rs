@@ -15,6 +15,7 @@ use jsy_mk_194_rs::{
     types::ChannelStatistics,
     units::{ElectricCurrent, ElectricPotential, Energy, Power, watt_hour},
 };
+use tracing::info;
 
 #[cfg(not(feature = "csv"))]
 fn main() {
@@ -26,6 +27,8 @@ fn main() {
 #[cfg(feature = "csv")]
 #[tokio::main]
 async fn main() {
+    home_power_monitor::init_tracing();
+
     let config = csv_exporter_agent::Config {
         file_path: "power_readings.csv".into(),
     };
@@ -45,7 +48,7 @@ async fn main() {
                 negative_active_energy: Energy::new::<watt_hour>(rand::random::<f32>() * 500.0),
             },
         };
-        println!("Generated random power reading: {}", record.reading);
+        info!(reading = %record.reading, "Generated random power reading");
         postmaster::send(
             Addresses::CSV,
             Addresses::Core,

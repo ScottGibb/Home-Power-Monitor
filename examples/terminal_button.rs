@@ -13,6 +13,8 @@ fn main() {
 #[cfg(feature = "terminal-buttons")]
 #[tokio::main]
 async fn main() {
+    home_power_monitor::init_tracing();
+
     let agent = TerminalCommandAgent {
         key: "a",
         button: Button::Start,

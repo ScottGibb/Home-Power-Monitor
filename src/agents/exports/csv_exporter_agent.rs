@@ -9,6 +9,7 @@ use crate::{
 use csv_async::AsyncWriter;
 use jsy_mk_194_rs::units::{ampere, volt, watt};
 use tokio::fs::{File, OpenOptions};
+use tracing::{error, info, trace, warn};
 
 pub struct CSVExporterAgent {
     _address: Addresses,
@@ -67,16 +68,14 @@ impl Agent for CSVExporterAgent {
                 Payloads::PowerReading(reading) => {
                     // Append the reading to the CSV file
                     match self.append_to_csv(reading).await {
-                        Ok(_) => {
-                            println!("CSVExporterAgent successfully wrote a new record to CSV")
-                        }
-                        Err(e) => eprintln!("Failed to write to CSV: {:?}", e),
+                        Ok(_) => trace!("CSVExporterAgent wrote a new record to CSV"),
+                        Err(e) => error!(error = ?e, "CSVExporterAgent failed to write to CSV"),
                     }
                 }
                 _ => {
-                    eprintln!(
-                        "CSVExporterAgent received unexpected message: {:?}",
-                        received_message.payload
+                    warn!(
+                        payload = ?received_message.payload,
+                        "CSVExporterAgent received unexpected message"
                     );
                 }
             }

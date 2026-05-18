@@ -20,18 +20,25 @@ use crate::{
     config::{get_csv_exporter_config, get_power_meter_config, get_terminal_button_configs},
 };
 use post_haste::init_postmaster;
+use tracing::info;
+use tracing_subscriber::EnvFilter;
 
 use crate::agents::Payloads;
 init_postmaster!(Addresses, Payloads);
 
+pub fn init_tracing() {
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let _ = tracing_subscriber::fmt().with_env_filter(filter).try_init();
+}
+
 pub fn print_metadata() {
-    println!("\n Here is the binary's metadata:\n");
-    println!("Schema version:  {}", metadata::schema());
-    println!("Compile time:    {}", metadata::compile_time());
-    println!("Commit hash:     {}", metadata::short_hash());
-    println!("Is dirty build:  {}", metadata::is_dirty());
-    println!("Tag description: {}", metadata::tag_describe());
-    println!("Last author:     {}", metadata::last_author());
+    info!("Here is the binary metadata");
+    info!(schema_version = %metadata::schema(), "metadata");
+    info!(compile_time = %metadata::compile_time(), "metadata");
+    info!(commit_hash = %metadata::short_hash(), "metadata");
+    info!(is_dirty_build = %metadata::is_dirty(), "metadata");
+    info!(tag_description = %metadata::tag_describe(), "metadata");
+    info!(last_author = %metadata::last_author(), "metadata");
 }
 
 pub async fn setup_agents() {

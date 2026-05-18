@@ -6,6 +6,7 @@ use jsy_mk_194_rs::{
     units::{ElectricCurrent, ElectricPotential, Energy, Power, ampere, volt, watt, watt_hour},
 };
 use post_haste::agent::{Agent, Inbox};
+use tracing::{error, info, warn};
 
 use crate::{
     agents::{Addresses, Payloads, inputs::power_meter_agent::PowerReading},
@@ -57,20 +58,20 @@ impl Agent for MockPowerMeterAgent {
 
                     for receiver in &self.receivers {
                         if let Err(err) = postmaster::send(*receiver, self.address, zero_reading.clone()).await {
-                            eprintln!("MockPowerMeterAgent failed to send reading: {:?}", err);
+                            error!(error = ?err, "MockPowerMeterAgent failed to send reading");
                         }
                     }
                 }
                 received_message = inbox.recv() => {
                     match received_message {
                         Some(message) => {
-                            println!(
-                                "MockPowerMeterAgent received an unknown message: {:?}",
-                                message.payload
+                            warn!(
+                                payload = ?message.payload,
+                                "MockPowerMeterAgent received an unknown message"
                             );
                         }
                         None => {
-                            eprintln!("MockPowerMeterAgent inbox closed");
+                            info!("MockPowerMeterAgent inbox closed");
                         }
                     }
                 }
