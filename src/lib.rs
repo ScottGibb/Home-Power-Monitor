@@ -18,6 +18,11 @@ use crate::config::get_mqtt_exporter_config;
 use crate::{
     agents::exports::csv_exporter_agent::CSVExporterAgent, config::get_csv_exporter_config,
 };
+#[cfg(feature = "screen")]
+use crate::{
+    agents::screen::{mock_screen::MockScreen, screen_agent::ScreenAgent},
+    config::get_screen_agent_config,
+};
 
 #[cfg(feature = "mock-power-meter")]
 use crate::agents::inputs::mock_power_meter_agent::Config;
@@ -73,7 +78,8 @@ pub async fn setup_agents() {
     #[cfg(feature = "database")]
     unimplemented!("Database agent is not yet implemented");
     #[cfg(feature = "screen")]
-    unimplemented!("Screen agent is not yet implemented");
+    postmaster::register_agent!(Screen, ScreenAgent<MockScreen>, get_screen_agent_config())
+        .unwrap();
 }
 
 pub async fn setup_terminal_buttons() {

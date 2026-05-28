@@ -19,7 +19,7 @@ async fn main() {
 
     let agent = TerminalCommandAgent {
         key: "a",
-        button: Button::Start,
+        button: Button::NextSreen,
         receivers: vec![Addresses::DebugAgent],
     };
     tokio::spawn(agent.button_task());

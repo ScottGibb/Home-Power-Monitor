@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["mqtt", "csv", "terminal-buttons"]
+default = ["mqtt", "csv", "terminal-buttons", "screen"]
 # default = []
 
 terminal-buttons = []

@@ -4,6 +4,12 @@ use std::path::PathBuf;
 use crate::agents::exports::csv_exporter_agent;
 #[cfg(feature = "mqtt")]
 use crate::agents::exports::mqtt_exporter_agent;
+#[cfg(feature = "screen")]
+use crate::agents::screen::{
+    mock_screen::MockScreen,
+    screen::{Screen, ScreenData},
+    screen_agent,
+};
 use crate::agents::{
     Addresses,
     inputs::{
@@ -17,6 +23,7 @@ use jsy_mk_194_rs::types::Baudrate;
 pub fn get_terminal_button_configs() -> TerminalButtonConfigs {
     TerminalButtonConfigs::default()
 }
+
 pub fn get_power_meter_config() -> power_meter_agent::Config {
     let mut receivers = Vec::new();
     #[cfg(feature = "csv")]
@@ -46,13 +53,25 @@ pub fn get_mqtt_exporter_config() -> mqtt_exporter_agent::Config {
         port: 1883,
     }
 }
+#[cfg(feature = "screen")]
+pub fn get_screen_agent_config() -> screen_agent::Config<MockScreen> {
+    let screen = MockScreen::new();
+    screen_agent::Config { screen }
+}
 
 impl Default for TerminalButtonConfigs {
     fn default() -> Self {
-        TerminalButtonConfigs::new(vec![TerminalButtonConfig {
-            key: "start",
-            button: Button::Start,
-            receivers: vec![Addresses::DebugAgent],
-        }])
+        TerminalButtonConfigs::new(vec![
+            TerminalButtonConfig {
+                key: "next",
+                button: Button::NextSreen,
+                receivers: vec![Addresses::Screen],
+            },
+            TerminalButtonConfig {
+                key: "previous",
+                button: Button::PreviousScreen,
+                receivers: vec![Addresses::Screen],
+            },
+        ])
     }
 }
