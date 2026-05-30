@@ -762,6 +762,8 @@ dependencies = [
  "chrono",
  "commitment-issues",
  "csv-async",
+ "embedded-hal 1.0.0",
+ "embedded-hal-async",
  "jsy-mk-194-rs",
  "liquid_crystal",
  "post-haste",
