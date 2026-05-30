@@ -4,6 +4,7 @@
 commitment_issues::include_metadata!();
 pub mod agents;
 pub mod config;
+pub mod database;
 
 #[cfg(feature = "mqtt")]
 use crate::agents::exports::mqtt_exporter_agent::MQTTExporterAgent;
@@ -78,20 +79,21 @@ pub async fn setup_agents() {
     #[cfg(feature = "database")]
     unimplemented!("Database agent is not yet implemented");
     #[cfg(feature = "screen")]
-    postmaster::register_agent!(Screen, ScreenAgent<MockScreen>, get_screen_agent_config())
-        .unwrap();
+    postmaster::register_agent!(
+        Screen,
+        ScreenAgent<MockScreen>,
+        get_screen_agent_config().await
+    )
+    .unwrap();
 }
 
 pub async fn setup_terminal_buttons() {
-    let buttons = get_terminal_button_configs();
-    for button in buttons {
-        let agent = TerminalCommandAgent {
-            key: button.key,
-            button: button.button,
-            receivers: button.receivers,
-        };
-        tokio::spawn(agent.button_task());
-    }
+    let keymap = get_terminal_button_configs();
+    let agent = TerminalCommandAgent {
+        keymap,
+        receivers: vec![Addresses::DebugAgent],
+    };
+    tokio::spawn(agent.button_task());
 }
 
 pub async fn setup_gpio_buttons() {

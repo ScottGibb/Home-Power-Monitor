@@ -4,6 +4,7 @@ use home_power_monitor::{
         inputs::power_meter_agent::PowerReading,
         screen::screen_agent::{Config, ScreenAgent},
     },
+    database::Database,
     postmaster,
 };
 use jsy_mk_194_rs::{
@@ -22,7 +23,11 @@ fn main() {
 #[tokio::main]
 async fn main() {
     use home_power_monitor::agents::{
-        Addresses, inputs::Button, inputs::buttons::terminal_command_agent::TerminalCommandAgent,
+        Addresses,
+        inputs::{
+            Button,
+            buttons::terminal_command_agent::{TerminalButtonConfig, TerminalCommandAgent},
+        },
         screen::mock_screen::MockScreen,
     };
     use jsy_mk_194_rs::{
@@ -32,26 +37,30 @@ async fn main() {
 
     home_power_monitor::init_tracing();
 
-    let next_button = TerminalCommandAgent {
-        key: "next",
-        button: Button::NextSreen,
+    let mut keymap = TerminalButtonConfig::new();
+    keymap.insert("a".to_string(), Button::NextScreen);
+    keymap.insert("b".to_string(), Button::PreviousScreen);
+
+    let agent = TerminalCommandAgent {
+        keymap: keymap.into_iter().collect(),
         receivers: vec![Addresses::Screen],
     };
-    let previous_button = TerminalCommandAgent {
-        key: "previous",
-        button: Button::PreviousScreen,
-        receivers: vec![Addresses::Screen],
-    };
-    tokio::spawn(next_button.button_task());
-    tokio::spawn(previous_button.button_task());
+    tokio::spawn(agent.button_task());
 
-    let screen = MockScreen::new();
-    postmaster::register_agent!(Screen, ScreenAgent<MockScreen>, Config { screen }).unwrap();
-
+    let screen = MockScreen::new().await;
+    postmaster::register_agent!(
+        Screen,
+        ScreenAgent<MockScreen>,
+        Config {
+            screen,
+            database: Database {}
+        }
+    )
+    .unwrap();
     let mut active_power_w = 0.0_f32;
     loop {
         active_power_w = (active_power_w + 10.0) % 3000.0;
-        tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+        tokio::time::sleep(std::time::Duration::from_secs(100)).await;
         postmaster::send(
             Addresses::Screen,
             Addresses::PowerMeter,

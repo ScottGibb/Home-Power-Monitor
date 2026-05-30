@@ -4,6 +4,6 @@ pub mod power_meter_agent;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Button {
-    NextSreen,
+    NextScreen,
     PreviousScreen,
 }

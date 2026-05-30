@@ -1,6 +1,8 @@
 //! The "button" task, which asynchronously awaits for the user to press enter,
 //! signalling that the pedestrian wants to cross
 
+use std::collections::HashMap;
+
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 use tracing::{error, info, trace};
 
@@ -9,9 +11,9 @@ use crate::{
     postmaster,
 };
 
+pub type TerminalButtonConfig = HashMap<String, Button>;
 pub struct TerminalCommandAgent {
-    pub key: &'static str,
-    pub button: Button,
+    pub keymap: TerminalButtonConfig,
     pub receivers: Vec<Addresses>,
 }
 
@@ -21,20 +23,20 @@ impl TerminalCommandAgent {
         let mut reader = BufReader::new(stdin).lines();
 
         loop {
-            if let Ok(Some(line)) = reader.next_line().await
-                && line == self.key
-            {
-                trace!(key = %self.key, "ButtonAgent detected a button press");
-                for receiver in &self.receivers {
-                    match postmaster::send(
-                        *receiver,
-                        Addresses::Button,
-                        Payloads::ButtonPressed(self.button),
-                    )
-                    .await
-                    {
-                        Ok(_) => (),
-                        Err(e) => error!(error = ?e, "ButtonAgent failed to send message"),
+            if let Ok(Some(line)) = reader.next_line().await {
+                if let Some(button) = self.keymap.get(&line) {
+                    trace!(key = %line, "ButtonAgent detected a button press");
+                    for receiver in &self.receivers {
+                        match postmaster::send(
+                            *receiver,
+                            Addresses::Button,
+                            Payloads::ButtonPressed(*button),
+                        )
+                        .await
+                        {
+                            Ok(_) => (),
+                            Err(e) => error!(error = ?e, "ButtonAgent failed to send message"),
+                        }
                     }
                 }
             }

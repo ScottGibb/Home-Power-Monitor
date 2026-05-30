@@ -1,27 +1,33 @@
-use crate::agents::screen::screen::{Screen, ScreenData};
+use jsy_mk_194_rs::units::{kilowatt_hour, watt};
+use tracing::info;
+
+use crate::agents::screen::{
+    screen::{Screen, ScreenData, ScreenMessage},
+    utils::{center_string, string_to_char_array},
+};
 use std::io::{self, Write};
 
 const SCREEN_WIDTH: usize = 20;
 const SCREEN_HEIGHT: usize = 2;
 pub struct MockScreen {
-    pub current_screen: ScreenData,
+    current_screen: ScreenData,
     screen_buffer: [[char; SCREEN_WIDTH]; SCREEN_HEIGHT],
     terminal_initialized: bool,
 }
 
-impl Default for MockScreen {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl MockScreen {
-    pub fn new() -> Self {
-        Self {
-            current_screen: ScreenData::Error("No data yet".to_string()),
+    pub async fn new() -> Self {
+        let mut screen = Self {
+            current_screen: ScreenData::Message(ScreenMessage::Error("No data yet".to_string())),
             screen_buffer: [[' '; SCREEN_WIDTH]; SCREEN_HEIGHT],
             terminal_initialized: false,
-        }
+        };
+        screen
+            .update_display(ScreenData::Message(ScreenMessage::Error(
+                "No data yet".to_string(),
+            )))
+            .await;
+        screen
     }
 }
 
@@ -35,15 +41,118 @@ impl Drop for MockScreen {
 
 impl Screen for MockScreen {
     async fn update_display(&mut self, screen_data: ScreenData) -> () {
-        if self.current_screen == screen_data {
-            return;
-        }
+        let screen_string = self.calculate_screen_string(&screen_data);
+
+        self.write_to_screen_buffer(&screen_string);
         self.current_screen = screen_data;
-        let screen_string = self.current_screen.to_string();
-        let mut chars = screen_string.chars();
+    }
+
+    fn get_current_screen(&self) -> ScreenData {
+        self.current_screen.clone()
+    }
+}
+
+impl MockScreen {
+    fn calculate_screen_string(
+        &self,
+        screen_data: &ScreenData,
+    ) -> [char; SCREEN_WIDTH * SCREEN_HEIGHT] {
+        let string = match screen_data {
+            ScreenData::Average(avg_power) => {
+                let avg_power = avg_power.get::<watt>();
+                let title = center_string("Average Power (W)", SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let value = center_string(&format!("{:.2}", avg_power), SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                format!("{}\n{}", title, value)
+            }
+
+            ScreenData::Instantaneous(instant_power) => {
+                let instant_power = instant_power.get::<watt>();
+                let title = center_string("Instant Power (W)", SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let value = center_string(&format!("{}", instant_power), SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                format!("{}\n{}", title, value)
+            }
+            ScreenData::Daily {
+                current_power,
+                energy,
+            } => {
+                let current_power = current_power.get::<watt>();
+                let energy = energy.get::<kilowatt_hour>();
+                let title = center_string("Daily Usage", SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let value = center_string(
+                    &format!("P: {}W E: {:.2}kWh", current_power, energy),
+                    SCREEN_WIDTH,
+                )
+                .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                format!("{}\n{}", title, value)
+            }
+            ScreenData::Monthly {
+                total_energy,
+                daily_low: _,
+                daily_avg,
+                daily_high: _,
+            } => {
+                let total_energy = total_energy.get::<kilowatt_hour>();
+                let daily_avg = daily_avg.get::<kilowatt_hour>();
+
+                let title = center_string("Monthly Usage", SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let value = center_string(
+                    &format!("T:{:.1}kWh A:{:.1}kWh", total_energy, daily_avg),
+                    SCREEN_WIDTH,
+                )
+                .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                format!("{}\n{}", title, value)
+            }
+            ScreenData::Yearly {
+                lowest_day: _,
+                avg_day: _,
+                highest_day: _,
+                total_energy,
+            } => {
+                let total_energy = total_energy.get::<kilowatt_hour>();
+                let title = center_string("Yearly Usage (kWh)", SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let value = center_string(&format!("{:.3}", total_energy), SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                format!("{}\n{}", title, value)
+            }
+            ScreenData::Message(screen_message) => {
+                let (title, content) = match screen_message {
+                    ScreenMessage::Custom { title, content } => (title, content),
+                    ScreenMessage::Error(err) => (&"Error".to_owned(), err),
+                };
+                let title = center_string(title, SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let content = center_string(content, SCREEN_WIDTH)
+                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                format!("{}\n{}", title, content)
+            }
+        };
+        string_to_char_array::<{ SCREEN_WIDTH * SCREEN_HEIGHT }>(&string)
+    }
+    fn write_to_screen_buffer(&mut self, char_array: &[char; SCREEN_WIDTH * SCREEN_HEIGHT]) {
+        // Convert the char array back to a string for logging
+        let flat_string: String = char_array.iter().collect();
+        info!("Updating screen with:\n{}", flat_string);
+
+        // Split the flat string into lines by '\n', pad/truncate each line to SCREEN_WIDTH
+        let lines: Vec<&str> = flat_string.split('\n').collect();
         for row in 0..SCREEN_HEIGHT {
+            let line = lines.get(row).copied().unwrap_or("");
+            let mut chars: Vec<char> = line.chars().collect();
+            // Pad or truncate to SCREEN_WIDTH
+            if chars.len() < SCREEN_WIDTH {
+                chars.extend(std::iter::repeat(' ').take(SCREEN_WIDTH - chars.len()));
+            } else if chars.len() > SCREEN_WIDTH {
+                chars.truncate(SCREEN_WIDTH);
+            }
             for col in 0..SCREEN_WIDTH {
-                self.screen_buffer[row][col] = chars.next().unwrap_or(' ');
+                self.screen_buffer[row][col] = chars[col];
             }
         }
 
@@ -69,9 +178,5 @@ impl Screen for MockScreen {
         println!();
 
         let _ = io::stdout().flush();
-    }
-
-    fn get_current_screen(&self) -> ScreenData {
-        self.current_screen.clone()
     }
 }

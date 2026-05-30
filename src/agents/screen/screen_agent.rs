@@ -12,18 +12,21 @@ use crate::{
             screen::{Screen, ScreenData},
         },
     },
+    database::Database,
     postmaster,
 };
 
 pub struct ScreenAgent<S: Screen> {
     _address: Addresses,
     screen: S,
+    database: Database,
     current_power: Power,
     average_power: Power,
 }
 
 pub struct Config<S: Screen> {
     pub screen: S,
+    pub database: Database,
 }
 impl<S: Screen> Agent for ScreenAgent<S> {
     type Address = Addresses;
@@ -36,26 +39,37 @@ impl<S: Screen> Agent for ScreenAgent<S> {
             screen: config.screen,
             current_power: Power::default(),
             average_power: Power::default(),
+            database: config.database,
         }
     }
 
     async fn run(mut self, mut inbox: Inbox<Self::Message>) -> ! {
         loop {
             let received_message = inbox.recv().await.unwrap();
+            info!(
+                "ScreenAgent received message: {:?}",
+                received_message.payload
+            );
             match received_message.payload {
                 Payloads::ButtonPressed(button) => {
                     let current_screen = self.screen.get_current_screen();
                     let new_screen = match button {
-                        Button::NextSreen => self.next(current_screen),
+                        Button::NextScreen => self.next(current_screen),
                         Button::PreviousScreen => self.previous(current_screen),
                     };
+                    info!("Updating screen to: {:?}", new_screen);
                     self.screen.update_display(new_screen).await;
+                }
+                Payloads::ScreenUpdate(message) => {
+                    self.screen
+                        .update_display(ScreenData::Message(message))
+                        .await;
                 }
                 Payloads::PowerReading(reading) => {
                     // Update Internal Power State
                     self.current_power = reading.reading.active_power;
                     match self.screen.get_current_screen() {
-                        ScreenData::Instantaneous(_) | ScreenData::Error(_) => {
+                        ScreenData::Instantaneous(_) => {
                             self.screen
                                 .update_display(ScreenData::Instantaneous(self.current_power))
                                 .await;
@@ -74,45 +88,45 @@ impl<S: Screen> ScreenAgent<S> {
             ScreenData::Instantaneous(_) => ScreenData::Average(self.average_power),
             ScreenData::Average(_) => ScreenData::Daily {
                 current_power: self.current_power,
-                energy: Energy::default(),
+                energy: self.database.get_daily_energy().avg,
             },
             ScreenData::Daily { .. } => ScreenData::Monthly {
-                total_energy: Energy::default(),
-                daily_low: Energy::default(),
-                daily_avg: Energy::default(),
-                daily_high: Energy::default(),
+                total_energy: self.database.get_monthly_energy().total_energy,
+                daily_low: self.database.get_monthly_energy().daily_low,
+                daily_avg: self.database.get_monthly_energy().daily_avg,
+                daily_high: self.database.get_monthly_energy().daily_high,
             },
             ScreenData::Monthly { .. } => ScreenData::Yearly {
-                lowest_day: Energy::default(),
-                avg_day: Energy::default(),
-                highest_day: Energy::default(),
-                total_energy: Energy::default(),
+                lowest_day: self.database.get_yearly_energy().lowest_day,
+                avg_day: self.database.get_yearly_energy().avg_day,
+                highest_day: self.database.get_yearly_energy().highest_day,
+                total_energy: self.database.get_yearly_energy().total_energy,
             },
             ScreenData::Yearly { .. } => ScreenData::Instantaneous(self.current_power),
-            _ => current_screen,
+            _ => ScreenData::Instantaneous(self.current_power),
         }
     }
     pub fn previous(&self, current_screen: ScreenData) -> ScreenData {
         match current_screen {
             ScreenData::Average(_) => ScreenData::Instantaneous(self.current_power),
             ScreenData::Instantaneous(_) => ScreenData::Yearly {
-                lowest_day: Energy::default(),
-                avg_day: Energy::default(),
-                highest_day: Energy::default(),
-                total_energy: Energy::default(),
+                lowest_day: self.database.get_yearly_energy().lowest_day,
+                avg_day: self.database.get_yearly_energy().avg_day,
+                highest_day: self.database.get_yearly_energy().highest_day,
+                total_energy: self.database.get_yearly_energy().total_energy,
             },
             ScreenData::Daily { .. } => ScreenData::Average(self.average_power),
             ScreenData::Monthly { .. } => ScreenData::Daily {
                 current_power: self.current_power,
-                energy: Energy::default(),
+                energy: self.database.get_daily_energy().avg,
             },
             ScreenData::Yearly { .. } => ScreenData::Monthly {
-                total_energy: Energy::default(),
-                daily_low: Energy::default(),
-                daily_avg: Energy::default(),
-                daily_high: Energy::default(),
+                total_energy: self.database.get_monthly_energy().total_energy,
+                daily_low: self.database.get_monthly_energy().daily_low,
+                daily_avg: self.database.get_monthly_energy().daily_avg,
+                daily_high: self.database.get_monthly_energy().daily_high,
             },
-            _ => current_screen,
+            _ => ScreenData::Instantaneous(self.current_power),
         }
     }
 }

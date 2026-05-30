@@ -32,42 +32,11 @@ pub enum ScreenData {
         highest_day: Energy,
         total_energy: Energy,
     },
-    Error(String),
+    Message(ScreenMessage),
 }
 
-impl ToString for ScreenData {
-    fn to_string(&self) -> String {
-        match self {
-            ScreenData::Average(power) => format!("Average Power: {:.2} W", power.get::<watt>()),
-            ScreenData::Instantaneous(power) => {
-                format!("Instantaneous Power: {:.2} W", power.get::<watt>())
-            }
-            ScreenData::Daily {
-                current_power,
-                energy,
-            } => format!(
-                "Daily Energy: {:.2} kWh, Current Power: {:.2} W",
-                energy.get::<kilowatt_hour>(),
-                current_power.get::<watt>()
-            ),
-            ScreenData::Monthly {
-                total_energy,
-                daily_avg,
-                daily_high,
-                ..
-            } => format!(
-                "Monthly Energy: {:.2} kWh, Daily Avg: {:.2} kWh, Daily High: {:.2} kWh",
-                total_energy.get::<kilowatt_hour>(),
-                daily_avg.get::<kilowatt_hour>(),
-                daily_high.get::<kilowatt_hour>()
-            ),
-            ScreenData::Yearly { total_energy, .. } => {
-                format!(
-                    "Yearly Energy: {:.2} kWh",
-                    total_energy.get::<kilowatt_hour>()
-                )
-            }
-            ScreenData::Error(err) => format!("Error: {}", err),
-        }
-    }
+#[derive(Debug, Clone, PartialEq)]
+pub enum ScreenMessage {
+    Custom { title: String, content: String },
+    Error(String),
 }
