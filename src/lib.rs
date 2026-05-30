@@ -25,9 +25,6 @@ use crate::{
     config::get_screen_agent_config,
 };
 
-#[cfg(feature = "mock-power-meter")]
-use crate::agents::inputs::mock_power_meter_agent::Config;
-
 use crate::agents::{
     Addresses,
     debug_agent::DebugAgent,
@@ -63,15 +60,7 @@ pub async fn setup_agents() {
     #[cfg(not(feature = "mock-power-meter"))]
     postmaster::register_agent!(PowerMeter, PowerMeterAgent, get_power_meter_config()).unwrap();
     #[cfg(feature = "mock-power-meter")]
-    postmaster::register_agent!(
-        PowerMeter,
-        MockPowerMeterAgent,
-        Config {
-            period: get_power_meter_config().period,
-            receivers: get_power_meter_config().receivers,
-        }
-    )
-    .unwrap();
+    postmaster::register_agent!(PowerMeter, MockPowerMeterAgent, get_power_meter_config()).unwrap();
     #[cfg(feature = "csv")]
     postmaster::register_agent!(CSV, CSVExporterAgent, get_csv_exporter_config()).unwrap();
     #[cfg(feature = "mqtt")]
@@ -91,7 +80,7 @@ pub async fn setup_terminal_buttons() {
     let keymap = get_terminal_button_configs();
     let agent = TerminalCommandAgent {
         keymap,
-        receivers: vec![Addresses::DebugAgent],
+        receivers: vec![Addresses::Screen],
     };
     tokio::spawn(agent.button_task());
 }

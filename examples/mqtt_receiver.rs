@@ -1,9 +1,17 @@
-use rumqttc::{AsyncClient, MqttOptions};
-use tokio::task;
-use tracing::{error, info};
+#[cfg(not(feature = "mqtt"))]
+fn main() {
+    panic!(
+        "This example requires the 'mqtt' feature to be enabled. Please run with '--features mqtt'."
+    );
+}
 
+#[cfg(feature = "mqtt")]
 #[tokio::main]
 async fn main() {
+    use rumqttc::{AsyncClient, MqttOptions};
+    use tokio::task;
+    use tracing::{error, info};
+
     let mut mqttoptions = MqttOptions::new("rust-test", "192.168.0.68", 1883);
     mqttoptions.set_keep_alive(std::time::Duration::from_secs(5));
 

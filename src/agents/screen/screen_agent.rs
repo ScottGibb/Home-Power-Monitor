@@ -46,10 +46,6 @@ impl<S: Screen> Agent for ScreenAgent<S> {
     async fn run(mut self, mut inbox: Inbox<Self::Message>) -> ! {
         loop {
             let received_message = inbox.recv().await.unwrap();
-            info!(
-                "ScreenAgent received message: {:?}",
-                received_message.payload
-            );
             match received_message.payload {
                 Payloads::ButtonPressed(button) => {
                     let current_screen = self.screen.get_current_screen();
@@ -57,7 +53,6 @@ impl<S: Screen> Agent for ScreenAgent<S> {
                         Button::NextScreen => self.next(current_screen),
                         Button::PreviousScreen => self.previous(current_screen),
                     };
-                    info!("Updating screen to: {:?}", new_screen);
                     self.screen.update_display(new_screen).await;
                 }
                 Payloads::ScreenUpdate(message) => {
@@ -74,6 +69,17 @@ impl<S: Screen> Agent for ScreenAgent<S> {
                                 .update_display(ScreenData::Instantaneous(self.current_power))
                                 .await;
                         }
+                        ScreenData::Daily {
+                            current_power: _,
+                            energy: _,
+                        } => {
+                            self.screen
+                                .update_display(ScreenData::Daily {
+                                    current_power: self.current_power,
+                                    energy: self.database.get_daily_energy(),
+                                })
+                                .await;
+                        }
                         _ => (),
                     };
                 }
@@ -88,7 +94,7 @@ impl<S: Screen> ScreenAgent<S> {
             ScreenData::Instantaneous(_) => ScreenData::Average(self.average_power),
             ScreenData::Average(_) => ScreenData::Daily {
                 current_power: self.current_power,
-                energy: self.database.get_daily_energy().avg,
+                energy: self.database.get_daily_energy(),
             },
             ScreenData::Daily { .. } => ScreenData::Monthly {
                 total_energy: self.database.get_monthly_energy().total_energy,
@@ -118,7 +124,7 @@ impl<S: Screen> ScreenAgent<S> {
             ScreenData::Daily { .. } => ScreenData::Average(self.average_power),
             ScreenData::Monthly { .. } => ScreenData::Daily {
                 current_power: self.current_power,
-                energy: self.database.get_daily_energy().avg,
+                energy: self.database.get_daily_energy(),
             },
             ScreenData::Yearly { .. } => ScreenData::Monthly {
                 total_energy: self.database.get_monthly_energy().total_energy,

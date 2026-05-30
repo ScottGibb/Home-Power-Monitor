@@ -8,8 +8,12 @@ use jsy_mk_194_rs::{
 use post_haste::agent::{Agent, Inbox};
 use tracing::{error, info, warn};
 
+use crate::agents::inputs::power_meter_agent::Config;
 use crate::{
-    agents::{Addresses, Payloads, inputs::power_meter_agent::PowerReading},
+    agents::{
+        Addresses, Payloads,
+        inputs::power_meter_agent::{PowerMeterAgent, PowerReading},
+    },
     postmaster,
 };
 
@@ -17,11 +21,6 @@ pub struct MockPowerMeterAgent {
     address: Addresses,
     receivers: Vec<Addresses>,
     period: Duration,
-}
-
-pub struct Config {
-    pub period: Duration,
-    pub receivers: Vec<Addresses>,
 }
 
 impl Agent for MockPowerMeterAgent {
@@ -43,16 +42,27 @@ impl Agent for MockPowerMeterAgent {
         loop {
             tokio::select! {
                 _ = ticker.tick() => {
+                    // Add a moving element: active_power varies as a sine wave with time
+                    let now = Utc::now();
+                    let seconds = now.timestamp() as f64 + (now.timestamp_subsec_micros() as f64) / 1_000_000.0;
+                    let amplitude = 1000.0; // watts
+                    let freq = 1.0 / 60.0; // 1 cycle per minute
+                    let active_power_val = amplitude * (2.0 * std::f64::consts::PI * freq * seconds).sin() as f32;
+
                     let zero_reading = Payloads::PowerReading(PowerReading {
-                        timestamp: Utc::now(),
+                        timestamp: now,
                         reading: ChannelStatistics {
-                            voltage: ElectricPotential::new::<volt>(0.0),
-                            current: ElectricCurrent::new::<ampere>(0.0),
-                            active_power: Power::new::<watt>(0.0),
+                            voltage: ElectricPotential::new::<volt>(230.0),
+                            current: ElectricCurrent::new::<ampere>(active_power_val / 230.0),
+                            active_power: Power::new::<watt>(active_power_val),
                             positive_active_energy: Energy::new::<watt_hour>(0.0),
                             negative_active_energy: Energy::new::<watt_hour>(0.0),
-                            power_factor: 0.0,
-                            power_direction: PowerDirection::Positive,
+                            power_factor: 1.0,
+                            power_direction: if active_power_val >= 0.0 {
+                                PowerDirection::Positive
+                            } else {
+                                PowerDirection::Negative
+                            },
                         },
                     });
 

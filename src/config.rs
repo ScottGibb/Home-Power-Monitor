@@ -36,11 +36,12 @@ pub fn get_power_meter_config() -> power_meter_agent::Config {
     receivers.push(Addresses::CSV);
     #[cfg(feature = "mqtt")]
     receivers.push(Addresses::MQTT);
-
+    #[cfg(feature = "screen")]
+    receivers.push(Addresses::Screen);
     power_meter_agent::Config {
         serial_port: "/dev/tty.usbserial-0001".to_string(),
         baud_rate: Baudrate::default(),
-        period: std::time::Duration::from_secs(5),
+        period: std::time::Duration::from_secs(1),
         receivers,
     }
 }

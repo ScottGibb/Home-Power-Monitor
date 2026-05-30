@@ -1,5 +1,3 @@
-use home_power_monitor::postmaster;
-
 #[cfg(not(feature = "mqtt"))]
 fn main() {
     panic!(
@@ -10,6 +8,8 @@ fn main() {
 #[cfg(feature = "mqtt")]
 #[tokio::main]
 async fn main() {
+    use home_power_monitor::postmaster;
+
     use home_power_monitor::agents::{Addresses, Payloads};
     use home_power_monitor::agents::{
         exports::mqtt_exporter_agent::{self, MQTTExporterAgent},

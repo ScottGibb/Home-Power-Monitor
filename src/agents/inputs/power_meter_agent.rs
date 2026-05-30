@@ -10,13 +10,13 @@ use chrono::{DateTime, Utc};
 use jsy_mk_194_rs::jsy_mk_194g::JsyMk194g;
 use jsy_mk_194_rs::types::Baudrate;
 use jsy_mk_194_rs::types::Channel;
-use jsy_mk_194_rs::{delay::StdDelay, types::ChannelStatistics};
+use jsy_mk_194_rs::types::ChannelStatistics;
 use tokio_serial::{SerialPortBuilderExt, SerialStream};
 use tracing::{error, info, warn};
 
 pub struct PowerMeterAgent {
     address: Addresses,
-    power_meter: JsyMk194g<SerialStream, StdDelay>,
+    power_meter: JsyMk194g<SerialStream>,
     receivers: Vec<Addresses>,
     period: Duration,
 }
@@ -41,7 +41,7 @@ impl Agent for PowerMeterAgent {
         let port = tokio_serial::new(&config.serial_port, u32::from(config.baud_rate))
             .open_native_async()
             .unwrap();
-        let power_meter = JsyMk194g::new_default(port, StdDelay).await.unwrap();
+        let power_meter = JsyMk194g::new_default(port).await.unwrap();
         Self {
             address,
             power_meter,

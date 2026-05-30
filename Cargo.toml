@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [features]
-default = ["mqtt", "csv", "terminal-buttons", "screen"]
+default = ["csv", "terminal-buttons", "screen", "mock-power-meter"]
 # default = []
 
 terminal-buttons = []
@@ -26,6 +26,7 @@ csv-async = { version = "1", optional = true, features = ["tokio"] }
 jsy-mk-194-rs = { version = "0.1", default-features = false, features = [
     "tokio-async",
 ] }
+
 tokio = "1"
 tokio-serial = "5"
 commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2" }
@@ -39,7 +40,7 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 commitment-issues = { git = "https://github.com/dysonltd/commitment-issues", version = "0.2" }
 
 [patch.crates-io]
-jsy-mk-194-rs = { git = "https://github.com/ScottGibb/JSY-MK-194-rs.git", rev = "a7e03e8" }
+jsy-mk-194-rs = { git = "https://github.com/ScottGibb/JSY-MK-194-rs.git", rev = "323b9a7a62741497d219e81daab5302af0b0b83b" }
 
 [dev-dependencies]
 rand = "0.10"

@@ -975,7 +975,7 @@ dependencies = [
 [[package]]
 name = "jsy-mk-194-rs"
 version = "0.1.2"
-source = "git+https://github.com/ScottGibb/JSY-MK-194-rs.git?rev=a7e03e8#a7e03e8f2464c1d46e07332d0f2c069b8f89fd7f"
+source = "git+https://github.com/ScottGibb/JSY-MK-194-rs.git?rev=323b9a7a62741497d219e81daab5302af0b0b83b#323b9a7a62741497d219e81daab5302af0b0b83b"
 dependencies = [
  "embedded-hal-async",
  "maybe-async",

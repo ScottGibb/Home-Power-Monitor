@@ -1,4 +1,4 @@
-use jsy_mk_194_rs::units::{kilowatt_hour, watt};
+use jsy_mk_194_rs::units::{kilowatt, kilowatt_hour, watt};
 use tracing::info;
 
 use crate::agents::screen::{
@@ -60,34 +60,64 @@ impl MockScreen {
         let string = match screen_data {
             ScreenData::Average(avg_power) => {
                 let avg_power = avg_power.get::<watt>();
-                let title = center_string("Average Power (W)", SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
-                let value = center_string(&format!("{:.2}", avg_power), SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let title = match center_string("Average Power (W)", SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Title too wide for Average");
+                        format!("Err: {}", err)
+                    }
+                };
+                let value = match center_string(&format!("{:.2}", avg_power), SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Value too wide for Average");
+                        format!("Err: {}", err)
+                    }
+                };
                 format!("{}\n{}", title, value)
             }
 
             ScreenData::Instantaneous(instant_power) => {
                 let instant_power = instant_power.get::<watt>();
-                let title = center_string("Instant Power (W)", SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
-                let value = center_string(&format!("{}", instant_power), SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let title = match center_string("Instant Power (W)", SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Title too wide for Instantaneous");
+                        format!("Err: {}", err)
+                    }
+                };
+                let value = match center_string(&format!("{}", instant_power), SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Value too wide for Instantaneous");
+                        format!("Err: {}", err)
+                    }
+                };
                 format!("{}\n{}", title, value)
             }
             ScreenData::Daily {
                 current_power,
                 energy,
             } => {
-                let current_power = current_power.get::<watt>();
+                let current_power = current_power.get::<kilowatt>();
                 let energy = energy.get::<kilowatt_hour>();
-                let title = center_string("Daily Usage", SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
-                let value = center_string(
-                    &format!("P: {}W E: {:.2}kWh", current_power, energy),
+                let title = match center_string("Daily Usage (kW/kWh)", SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Title too wide for Daily");
+                        format!("Err: {}", err)
+                    }
+                };
+                let value = match center_string(
+                    &format!("P:{:.1} E:{:.1}", current_power, energy),
                     SCREEN_WIDTH,
-                )
-                .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                ) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Value too wide for Daily");
+                        format!("Err: {}", err)
+                    }
+                };
                 format!("{}\n{}", title, value)
             }
             ScreenData::Monthly {
@@ -99,13 +129,23 @@ impl MockScreen {
                 let total_energy = total_energy.get::<kilowatt_hour>();
                 let daily_avg = daily_avg.get::<kilowatt_hour>();
 
-                let title = center_string("Monthly Usage", SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
-                let value = center_string(
-                    &format!("T:{:.1}kWh A:{:.1}kWh", total_energy, daily_avg),
+                let title = match center_string("Monthly Usage (kWh)", SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Title too wide for Monthly");
+                        format!("Err: {}", err)
+                    }
+                };
+                let value = match center_string(
+                    &format!("T:{:.1} A:{:.1}", total_energy, daily_avg),
                     SCREEN_WIDTH,
-                )
-                .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                ) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Value too wide for Monthly");
+                        format!("Err: {}", err)
+                    }
+                };
                 format!("{}\n{}", title, value)
             }
             ScreenData::Yearly {
@@ -115,10 +155,20 @@ impl MockScreen {
                 total_energy,
             } => {
                 let total_energy = total_energy.get::<kilowatt_hour>();
-                let title = center_string("Yearly Usage (kWh)", SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
-                let value = center_string(&format!("{:.3}", total_energy), SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let title = match center_string("Yearly Usage (kWh)", SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Title too wide for Yearly");
+                        format!("Err: {}", err)
+                    }
+                };
+                let value = match center_string(&format!("{:.3}", total_energy), SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Value too wide for Yearly");
+                        format!("Err: {}", err)
+                    }
+                };
                 format!("{}\n{}", title, value)
             }
             ScreenData::Message(screen_message) => {
@@ -126,10 +176,20 @@ impl MockScreen {
                     ScreenMessage::Custom { title, content } => (title, content),
                     ScreenMessage::Error(err) => (&"Error".to_owned(), err),
                 };
-                let title = center_string(title, SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
-                let content = center_string(content, SCREEN_WIDTH)
-                    .unwrap_or_else(|_| "Err: Format Screen".to_string());
+                let title = match center_string(title, SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Title too wide for Message");
+                        format!("Err: {}", err)
+                    }
+                };
+                let content = match center_string(content, SCREEN_WIDTH) {
+                    Ok(s) => s,
+                    Err(err) => {
+                        tracing::error!(%err, "Content too wide for Message");
+                        format!("Err: {}", err)
+                    }
+                };
                 format!("{}\n{}", title, content)
             }
         };
@@ -138,7 +198,6 @@ impl MockScreen {
     fn write_to_screen_buffer(&mut self, char_array: &[char; SCREEN_WIDTH * SCREEN_HEIGHT]) {
         // Convert the char array back to a string for logging
         let flat_string: String = char_array.iter().collect();
-        info!("Updating screen with:\n{}", flat_string);
 
         // Split the flat string into lines by '\n', pad/truncate each line to SCREEN_WIDTH
         let lines: Vec<&str> = flat_string.split('\n').collect();

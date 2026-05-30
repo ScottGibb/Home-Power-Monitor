@@ -4,13 +4,6 @@ pub struct Database {
     // Placeholder for database connection and state
 }
 
-pub struct DailyEnergy {
-    pub low: Energy,
-    pub avg: Energy,
-    pub high: Energy,
-    pub total: Energy,
-}
-
 pub struct MonthlyEnergy {
     pub total_energy: Energy,
     pub daily_low: Energy,
@@ -25,14 +18,9 @@ pub struct YearlyEnergy {
 }
 
 impl Database {
-    pub fn get_daily_energy(&self) -> DailyEnergy {
+    pub fn get_daily_energy(&self) -> Energy {
         // Placeholder for fetching daily energy data from the database
-        DailyEnergy {
-            low: Energy::new::<watt_hour>(-1.0),
-            avg: Energy::new::<watt_hour>(-1.0),
-            high: Energy::new::<watt_hour>(-1.0),
-            total: Energy::new::<watt_hour>(-1.0),
-        }
+        Energy::new::<watt_hour>(-1.0)
     }
     pub fn get_monthly_energy(&self) -> MonthlyEnergy {
         // Placeholder for fetching monthly energy data from the database
